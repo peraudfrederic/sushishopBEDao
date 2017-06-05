@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jaxws="http://cxf.apache.org/jaxws" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+	   http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+	<import resource="classpath:META-INF/cxf/cxf.xml" />
+	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+
+	<context:annotation-config />
+	<context:component-scan base-package=" fr.fitec.projet.entity, fr.fitec.projet.dao " />
+	
+	<bean id="propertyConfigurer"
+	          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+	          p:location="classpath:/jdbc.properties" />
+	
+    <bean id="dataSource"
+          class="org.springframework.jdbc.datasource.DriverManagerDataSource"
+          p:driverClassName="${jdbc.driverClassName}"
+          p:url="${jdbc.url}"
+          p:username="${jdbc.username}"
+          p:password="${jdbc.password}" />
+	 
+	 <!-- configuration de JPA integré à spring
+	 		qui de facon implicite tient compte également de META-INF/persistence.xml -->
+	<bean id="myEmf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+	  <property name="dataSource" ref="dataSource"/>
+	</bean> 
+	
+	<!-- obligatoire car on a mis l'annotation @transactional pour que spring gère lui même les transaction (commit/rollback -->
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+	      <property name="entityManagerFactory" ref="myEmf"/>
+	</bean>
+		
+		
+	<!--  prend en compte les @Transactional dans le code java -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	
+
+</beans>
